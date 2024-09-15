@@ -10,7 +10,8 @@ require_relative 'king'
 class Board
   attr_accessor :setup, :board_array
 
-  PAWN_MOVESET = []
+  WHITE_PAWN_MOVESET = [-1, 0]
+  GREEN_PAWN_MOVESET = [1, 0]
   BISHOP_MOVESET = []
   KNIGHT_MOVESET = []
   ROOK_MOVESET = []
@@ -52,8 +53,8 @@ class Board
     return if setup != 'default'
 
     (0..7).each do |pawn|
-      @board_array[1][pawn].piece = Pawn.new(:green, [1, pawn], PAWN_MOVESET)
-      @board_array[6][pawn].piece = Pawn.new(:white, [6, pawn], PAWN_MOVESET)
+      @board_array[1][pawn].piece = Pawn.new(:green, [1, pawn], GREEN_PAWN_MOVESET)
+      @board_array[6][pawn].piece = Pawn.new(:white, [6, pawn], WHITE_PAWN_MOVESET)
     end
   end
 
@@ -99,14 +100,19 @@ class Board
   end
 
   def print_board(board_array)
+    count = 9
     board_array.each do |row|
+      count -= 1
       puts ''
       row.each do |column|
         print '['.colorize(column.color)
         column.piece.nil? ? (print ' ') : (print column.piece.symbol.colorize(column.piece.color))
         print ']'.colorize(column.color)
+        print " #{count}".colorize(:red) if column.board_y == 7
       end
     end
+    puts ''
+    print ' A  B  C  D  E  F  G  H  '.colorize(:red)
     puts ''
   end
 
