@@ -1,5 +1,5 @@
 class Piece
-  attr_accessor :taken, :current_pos
+  attr_accessor :taken, :current_pos, :first_move
   attr_writer :color, :spawn_pos, :move_set, :symbol
 
   def initialize(color, spawn_pos, move_set)
@@ -8,5 +8,6 @@ class Piece
     self.move_set = move_set
     self.taken = false
     self.current_pos = spawn_pos
+    self.first_move = true
   end
 end

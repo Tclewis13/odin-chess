@@ -33,16 +33,20 @@ class Game
       game_flow
     end
     destination_space = @board.board_array[coord_dest[0]][coord_dest[1]]
+    # if destination is empty
     if destination_space.piece.nil?
       destination_space.piece = moving_piece
       @board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
       moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
+      moving_piece.first_move = false
+    # if destination is occupied
     else
       destination_space.piece.taken = true
       destination_space.piece.current_pos = [nil, nil]
       destination_space.piece = moving_piece
       @board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
       moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
+      moving_piece.first_move = false
     end
 
     @board.print_board(@board.board_array)
