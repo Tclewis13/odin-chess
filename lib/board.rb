@@ -180,6 +180,8 @@ class Board
       length = 6
     when 'H'
       length = 7
+    else
+      return nil
     end
 
     case notation[1]
@@ -197,8 +199,16 @@ class Board
       depth = 2
     when '7'
       depth = 1
+    when '8'
+      depth = 0
+    else return nil
     end
 
     [depth, length]
+  end
+
+  def move_legal?(piece, destination)
+    legal_moves = piece.get_moves(@board_array)
+    legal_moves.include?(destination)
   end
 end

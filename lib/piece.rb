@@ -1,6 +1,6 @@
 class Piece
-  attr_accessor :taken
-  attr_writer :color, :spawn_pos, :move_set, :current_pos, :symbol
+  attr_accessor :taken, :current_pos
+  attr_writer :color, :spawn_pos, :move_set, :symbol
 
   def initialize(color, spawn_pos, move_set)
     self.color = color
