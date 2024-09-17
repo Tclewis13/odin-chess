@@ -15,8 +15,8 @@ class Board
   BISHOP_MOVESET = [[-1, 1], [1, 1], [1, -1], [-1, -1]]
   KNIGHT_MOVESET = [[-2, -1], [-1, -2], [1, -2], [2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1]]
   ROOK_MOVESET = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-  QUEEN_MOVESET = []
-  KING_MOVESET = []
+  QUEEN_MOVESET = Board::BISHOP_MOVESET | ROOK_MOVESET
+  KING_MOVESET = Board::BISHOP_MOVESET | ROOK_MOVESET
 
   def initialize(setup)
     self.setup = setup
@@ -89,14 +89,14 @@ class Board
     return if setup != 'default'
 
     @board_array[0][3].piece = Queen.new(:green, [0, 3], QUEEN_MOVESET)
-    @board_array[7][3].piece = Queen.new(:white, [0, 7], QUEEN_MOVESET)
+    @board_array[7][3].piece = Queen.new(:white, [7, 3], QUEEN_MOVESET)
   end
 
   def setup_kings(setup)
     return if setup != 'default'
 
     @board_array[0][4].piece = King.new(:green, [0, 4], KING_MOVESET)
-    @board_array[7][4].piece = King.new(:white, [0, 4], KING_MOVESET)
+    @board_array[7][4].piece = King.new(:white, [7, 4], KING_MOVESET)
   end
 
   def print_board(board_array)
