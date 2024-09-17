@@ -1,0 +1,62 @@
+
+[1mFrom:[0m /home/troy/repos/odin-chess/lib/bishop.rb:20 Bishop#get_moves:
+
+    [1;34m12[0m: [32mdef[0m [1;34mget_moves[0m(board_array)
+    [1;34m13[0m:   legal_moves = []
+    [1;34m14[0m:   move_set.each [32mdo[0m |direction|
+    [1;34m15[0m:     [1;34m7[0m.times [32mdo[0m |i|
+    [1;34m16[0m:       possible_move = []
+    [1;34m17[0m:       offset = []
+    [1;34m18[0m:       binding.pry
+    [1;34m19[0m:       offset[[1;34m0[0m] = direction[[1;34m0[0m] * i
+ => [1;34m20[0m:       offset[[1;34m1[0m] = direction[[1;34m1[0m] * i
+    [1;34m21[0m: 
+    [1;34m22[0m:       possible_move[[1;34m0[0m] = @current_pos[[1;34m0[0m] + offset[[1;34m0[0m]
+    [1;34m23[0m:       possible_move[[1;34m1[0m] = @current_pos[[1;34m1[0m] + offset[[1;34m1[0m]
+    [1;34m24[0m:       [32mif[0m possible_move[[1;34m0[0m].between?([1;34m0[0m, [1;34m7[0m) && possible_move[[1;34m1[0m].between?([1;34m0[0m, [1;34m7[0m) && board_array[possible_move[[1;34m0[0m]][possible_move[[1;34m1[0m]].piece.nil? [1;34m# rubocop:disable Layout/LineLength[0m
+    [1;34m25[0m:         [1;34m# empty space[0m
+    [1;34m26[0m:         legal_moves << possible_move
+    [1;34m27[0m:       [32melsif[0m possible_move[[1;34m0[0m].between?([1;34m0[0m, [1;34m7[0m) && possible_move[[1;34m1[0m].between?([1;34m0[0m, [1;34m7[0m) && board_array[possible_move[[1;34m0[0m]][possible_move[[1;34m1[0m]].piece.color != @color [1;34m# rubocop:disable Layout/LineLength[0m
+    [1;34m28[0m:         [1;34m# opposing piece space[0m
+    [1;34m29[0m:         legal_moves << possible_move
+    [1;34m30[0m:         [32mbreak[0m
+    [1;34m31[0m:       [32melse[0m
+    [1;34m32[0m:         [1;34m# friendly piece space[0m
+    [1;34m33[0m:         [32mbreak[0m
+    [1;34m34[0m:       [32mend[0m
+    [1;34m35[0m:     [32mend[0m
+    [1;34m36[0m:   [32mend[0m
+    [1;34m37[0m:   legal_moves
+    [1;34m38[0m: [32mend[0m
+
+
+[1mFrom:[0m /home/troy/repos/odin-chess/lib/bishop.rb:19 Bishop#get_moves:
+
+    [1;34m12[0m: [32mdef[0m [1;34mget_moves[0m(board_array)
+    [1;34m13[0m:   legal_moves = []
+    [1;34m14[0m:   move_set.each [32mdo[0m |direction|
+    [1;34m15[0m:     [1;34m7[0m.times [32mdo[0m |i|
+    [1;34m16[0m:       possible_move = []
+    [1;34m17[0m:       offset = []
+    [1;34m18[0m:       binding.pry
+ => [1;34m19[0m:       offset[[1;34m0[0m] = direction[[1;34m0[0m] * (i + [1;34m1[0m)
+    [1;34m20[0m:       offset[[1;34m1[0m] = direction[[1;34m1[0m] * (i + [1;34m1[0m)
+    [1;34m21[0m: 
+    [1;34m22[0m:       possible_move[[1;34m0[0m] = @current_pos[[1;34m0[0m] + offset[[1;34m0[0m]
+    [1;34m23[0m:       possible_move[[1;34m1[0m] = @current_pos[[1;34m1[0m] + offset[[1;34m1[0m]
+    [1;34m24[0m:       [32mif[0m possible_move[[1;34m0[0m].between?([1;34m0[0m, [1;34m7[0m) && possible_move[[1;34m1[0m].between?([1;34m0[0m, [1;34m7[0m) && board_array[possible_move[[1;34m0[0m]][possible_move[[1;34m1[0m]].piece.nil? [1;34m# rubocop:disable Layout/LineLength[0m
+    [1;34m25[0m:         [1;34m# empty space[0m
+    [1;34m26[0m:         legal_moves << possible_move
+    [1;34m27[0m:       [32melsif[0m possible_move[[1;34m0[0m].between?([1;34m0[0m, [1;34m7[0m) && possible_move[[1;34m1[0m].between?([1;34m0[0m, [1;34m7[0m) && board_array[possible_move[[1;34m0[0m]][possible_move[[1;34m1[0m]].piece.color != @color [1;34m# rubocop:disable Layout/LineLength[0m
+    [1;34m28[0m:         [1;34m# opposing piece space[0m
+    [1;34m29[0m:         legal_moves << possible_move
+    [1;34m30[0m:         [32mbreak[0m
+    [1;34m31[0m:       [32melse[0m
+    [1;34m32[0m:         [1;34m# friendly piece space[0m
+    [1;34m33[0m:         [32mbreak[0m
+    [1;34m34[0m:       [32mend[0m
+    [1;34m35[0m:     [32mend[0m
+    [1;34m36[0m:   [32mend[0m
+    [1;34m37[0m:   legal_moves
+    [1;34m38[0m: [32mend[0m
+
