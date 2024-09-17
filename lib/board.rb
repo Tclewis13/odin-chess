@@ -14,7 +14,7 @@ class Board
   GREEN_PAWN_MOVESET = [1, 0]
   BISHOP_MOVESET = []
   KNIGHT_MOVESET = [[-2, -1], [-1, -2], [1, -2], [2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1]]
-  ROOK_MOVESET = []
+  ROOK_MOVESET = [[-1, 0], [0, 1], [1, 0], [0, -1]]
   QUEEN_MOVESET = []
   KING_MOVESET = []
 
