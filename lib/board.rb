@@ -8,7 +8,7 @@ require_relative 'queen'
 require_relative 'king'
 
 class Board
-  attr_accessor :setup, :board_array
+  attr_accessor :setup, :board_array, :green_king, :white_king
 
   WHITE_PAWN_MOVESET = [-1, 0]
   GREEN_PAWN_MOVESET = [1, 0]
@@ -96,7 +96,9 @@ class Board
     return if setup != 'default'
 
     @board_array[0][4].piece = King.new(:green, [0, 4], KING_MOVESET)
+    @green_king = @board_array[0][4].piece
     @board_array[7][4].piece = King.new(:white, [7, 4], KING_MOVESET)
+    @white_king = @board_array[7][4].piece
   end
 
   def print_board(board_array)

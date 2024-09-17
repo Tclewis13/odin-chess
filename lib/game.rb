@@ -2,13 +2,16 @@ require_relative 'board'
 require 'pry-byebug'
 
 class Game
-  attr_writer :board, :setup, :turn
+  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest
 
   def initialize(board, setup = 'nil')
     self.board = board
     self.setup = setup
     board.print_board(board.board_array)
     self.turn = :white
+    self.green_manifest = []
+    self.white_manifest = []
+    generate_piece_manifest(@board.board_array)
 
     game_flow
   end
@@ -41,6 +44,12 @@ class Game
       moving_piece.first_move = false
     # if destination is occupied
     else
+      if @turn == :white
+        @green_manifest.delete(destination_space.piece)
+      elsif @turn == :green
+        @white_manifest.delete(destination_space.piece)
+      end
+
       destination_space.piece.taken = true
       destination_space.piece.current_pos = [nil, nil]
       destination_space.piece = moving_piece
@@ -50,6 +59,34 @@ class Game
     end
 
     @board.print_board(@board.board_array)
+    check_for_check
     game_flow
+  end
+
+  def check_for_check
+    if @turn == :green
+      green_legal_moves = []
+      @green_manifest.each do |piece|
+        temp_moves = piece.get_moves(@board.board_array)
+        temp_moves.each { |move| green_legal_moves << move }
+      end
+      puts 'Check!' if green_legal_moves.include?(@board.white_king.current_pos)
+    elsif @turn == :white
+      white_legal_moves = []
+      @white_manifest.each do |piece|
+        temp_moves = piece.get_moves(@board.board_array)
+        temp_moves.each { |move| white_legal_moves << move }
+      end
+      puts 'Check!' if white_legal_moves.include?(@board.green_king.current_pos)
+    end
+  end
+
+  def generate_piece_manifest(board_array)
+    2.times do |i|
+      8.times do |j|
+        @green_manifest << board_array[i][j].piece
+        @white_manifest << board_array[i + 6][j].piece
+      end
+    end
   end
 end
