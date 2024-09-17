@@ -15,25 +15,9 @@ class Rook < Piece
       7.times do |i|
         possible_move = []
         offset = []
-        # figure out which way we are going
-        if direction[0] != 0
-          # figure out, for math purposes, if we are going positive or negative direction
-          offset[1] = 0
-          offset[0] = if direction[0] < 0
-                        direction[0] - i
-                      else
-                        direction[0] + i
-                      end
-        end
-        # same as above, but in different direction
-        if direction[1] != 0
-          offset[0] = 0
-          offset[1] = if direction[1] < 0
-                        direction[1] - i
-                      else
-                        direction[1] + i
-                      end
-        end
+        offset[0] = direction[0] * (i + 1)
+        offset[1] = direction[1] * (i + 1)
+
         possible_move[0] = @current_pos[0] + offset[0]
         possible_move[1] = @current_pos[1] + offset[1]
         if possible_move[0].between?(0, 7) && possible_move[1].between?(0, 7) && board_array[possible_move[0]][possible_move[1]].piece.nil? # rubocop:disable Layout/LineLength
