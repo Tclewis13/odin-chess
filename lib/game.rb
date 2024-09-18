@@ -1,8 +1,9 @@
 require_relative 'board'
+require_relative 'space'
 require 'pry-byebug'
 
 class Game
-  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest
+  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest, :check
 
   def initialize(board, setup = 'nil')
     self.board = board
@@ -11,6 +12,7 @@ class Game
     self.turn = :white
     self.green_manifest = []
     self.white_manifest = []
+    self.check = false
     generate_piece_manifest(@board.board_array)
 
     game_flow
@@ -36,6 +38,16 @@ class Game
       game_flow
     end
     destination_space = @board.board_array[coord_dest[0]][coord_dest[1]]
+
+    if @check
+      proj_destination_space = Marshal.load(Marshal.dump(destination_space))
+      proj_moving_piece = Marshal.load(Marshal.dump(moving_piece))
+      if check_resolution(proj_destination_space, proj_moving_piece)
+        puts 'This move does not resolve check!'
+        game_flow
+      end
+    end
+
     # if destination is empty
     if destination_space.piece.nil?
       destination_space.piece = moving_piece
@@ -59,26 +71,69 @@ class Game
     end
 
     @board.print_board(@board.board_array)
-    check_for_check
+
+    if check_for_check(@board, @green_manifest, @white_manifest, @turn)
+      puts "#{@turn} King is in check!"
+      @check = true
+    end
+
+    if @turn == :white
+      @turn = :green
+    elsif @turn == :green
+      @turn = :white
+    end
+
     game_flow
   end
 
-  def check_for_check
-    if @turn == :green
+  def check_for_check(board, green_manifest, white_manifest, turn)
+    if turn == :green
       green_legal_moves = []
-      @green_manifest.each do |piece|
-        temp_moves = piece.get_moves(@board.board_array)
+      green_manifest.each do |piece|
+        temp_moves = piece.get_moves(board.board_array)
         temp_moves.each { |move| green_legal_moves << move }
       end
-      puts 'Check!' if green_legal_moves.include?(@board.white_king.current_pos)
-    elsif @turn == :white
+      return true if green_legal_moves.include?(board.white_king.current_pos)
+    elsif turn == :white
       white_legal_moves = []
-      @white_manifest.each do |piece|
-        temp_moves = piece.get_moves(@board.board_array)
+      white_manifest.each do |piece|
+        temp_moves = piece.get_moves(board.board_array)
         temp_moves.each { |move| white_legal_moves << move }
       end
-      puts 'Check!' if white_legal_moves.include?(@board.green_king.current_pos)
+      return true if white_legal_moves.include?(board.green_king.current_pos)
     end
+    false
+  end
+
+  def check_resolution(destination_space, moving_piece)
+    projected_board = Marshal.load(Marshal.dump(@board))
+    proj_green_manifest = @green_manifest.clone
+    proj_white_manifest = @white_manifest.clone
+
+    if destination_space.piece.nil?
+      destination_space.piece = moving_piece
+      projected_board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
+      moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
+      moving_piece.first_move = false
+    # if destination is occupied
+    else
+      if @turn == :white
+        deleted_piece = proj_green_manifest.select { |piece| piece.current_pos[0] == destination_space.board_x && piece.current_pos[1] == destination_space.board_y } # rubocop:disable Layout/LineLength
+        proj_green_manifest.delete(deleted_piece)
+      elsif @turn == :green
+        deleted_piece = proj_white_manifest.select { |piece| piece.current_pos[0] == destination_space.board_x && piece.current_pos[1] == destination_space.board_y } # rubocop:disable Layout/LineLength
+        proj_white_manifest.delete(deleted_piece[0])
+      end
+
+      destination_space.piece.taken = true
+      destination_space.piece.current_pos = [nil, nil]
+      destination_space.piece = moving_piece
+      projected_board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
+      moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
+      moving_piece.first_move = false
+    end
+
+    check_for_check(projected_board, proj_green_manifest, proj_white_manifest, @turn)
   end
 
   def generate_piece_manifest(board_array)

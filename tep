@@ -60,3 +60,36 @@
     [1;34m37[0m:   legal_moves
     [1;34m38[0m: [32mend[0m
 
+
+[1mFrom:[0m /home/troy/repos/odin-chess/lib/game.rb:121 Game#check_resolution:
+
+    [1;34m108[0m: [32mdef[0m [1;34mcheck_resolution[0m(destination_space, moving_piece)
+    [1;34m109[0m:   projected_board = [1;34;4mMarshal[0m.load([1;34;4mMarshal[0m.dump(@board))
+    [1;34m110[0m:   proj_green_manifest = @green_manifest.clone
+    [1;34m111[0m:   proj_white_manifest = @white_manifest.clone
+    [1;34m112[0m: 
+    [1;34m113[0m:   [32mif[0m destination_space.piece.nil?
+    [1;34m114[0m:     destination_space.piece = moving_piece
+    [1;34m115[0m:     projected_board.board_array[moving_piece.current_pos[[1;34m0[0m]][moving_piece.current_pos[[1;34m1[0m]].piece = [1;36mnil[0m
+    [1;34m116[0m:     moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
+    [1;34m117[0m:     moving_piece.first_move = [1;36mfalse[0m
+    [1;34m118[0m:   [1;34m# if destination is occupied[0m
+    [1;34m119[0m:   [32melse[0m
+    [1;34m120[0m:     binding.pry
+ => [1;34m121[0m:     [32mif[0m @turn == [33m:white[0m
+    [1;34m122[0m:       proj_green_manifest.delete(projected_board.board_array[destination_space.board_x][destination_space.board_y].piece)
+    [1;34m123[0m:     [32melsif[0m @turn == [33m:green[0m
+    [1;34m124[0m:       proj_white_manifest.delete(projected_board.board_array[destination_space.board_x][destination_space.board_y].piece)
+    [1;34m125[0m:     [32mend[0m
+    [1;34m126[0m: 
+    [1;34m127[0m:     destination_space.piece.taken = [1;36mtrue[0m
+    [1;34m128[0m:     destination_space.piece.current_pos = [[1;36mnil[0m, [1;36mnil[0m]
+    [1;34m129[0m:     destination_space.piece = moving_piece
+    [1;34m130[0m:     projected_board.board_array[moving_piece.current_pos[[1;34m0[0m]][moving_piece.current_pos[[1;34m1[0m]].piece = [1;36mnil[0m
+    [1;34m131[0m:     moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
+    [1;34m132[0m:     moving_piece.first_move = [1;36mfalse[0m
+    [1;34m133[0m:   [32mend[0m
+    [1;34m134[0m: 
+    [1;34m135[0m:   check_for_check(projected_board, proj_green_manifest, proj_white_manifest, turn)
+    [1;34m136[0m: [32mend[0m
+
