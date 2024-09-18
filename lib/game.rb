@@ -19,6 +19,7 @@ class Game
   end
 
   def game_flow
+    # get piece to move from user
     puts "#{@turn} turn. Select piece to move."
     notation_piece = gets.chomp
     notation_piece = notation_piece.upcase
@@ -29,6 +30,7 @@ class Game
       game_flow
     end
 
+    # get destination space from user
     puts "#{@turn} is moving piece at #{notation_piece}. Select destination."
     notation_dest = gets.chomp
     notation_dest = notation_dest.upcase
@@ -39,6 +41,7 @@ class Game
     end
     destination_space = @board.board_array[coord_dest[0]][coord_dest[1]]
 
+    # if last turn triggered check we need to make sure this move will remove check
     if @check
       proj_destination_space = Marshal.load(Marshal.dump(destination_space))
       proj_moving_piece = Marshal.load(Marshal.dump(moving_piece))
@@ -72,11 +75,13 @@ class Game
 
     @board.print_board(@board.board_array)
 
+    # check to see if this move checked the other king
     if check_for_check(@board, @green_manifest, @white_manifest, @turn)
       puts "#{@turn} King is in check!"
       @check = true
     end
 
+    # pass turn
     if @turn == :white
       @turn = :green
     elsif @turn == :green
@@ -87,6 +92,7 @@ class Game
   end
 
   def check_for_check(board, green_manifest, white_manifest, turn)
+    # get all legal moves of opposing pieces. If friendly king's position is among their legal moves, we have check
     if turn == :green
       green_legal_moves = []
       green_manifest.each do |piece|
@@ -106,10 +112,12 @@ class Game
   end
 
   def check_resolution(destination_space, moving_piece)
+    # make deep copies of board state so that we can check the validity of the proposed move
     projected_board = Marshal.load(Marshal.dump(@board))
     proj_green_manifest = @green_manifest.clone
     proj_white_manifest = @white_manifest.clone
 
+    # making changes to copied board state here. Should probably make this and the version in game_flow its own method but lololol whatever
     if destination_space.piece.nil?
       destination_space.piece = moving_piece
       projected_board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
@@ -117,6 +125,7 @@ class Game
       moving_piece.first_move = false
     # if destination is occupied
     else
+      # code here is modified because of destination_piece being a pointer to a pawn of original board state, but functionally the same as game_flow's code # rubocop:disable Layout/LineLength
       if @turn == :white
         deleted_piece = proj_green_manifest.select { |piece| piece.current_pos[0] == destination_space.board_x && piece.current_pos[1] == destination_space.board_y } # rubocop:disable Layout/LineLength
         proj_green_manifest.delete(deleted_piece)
@@ -133,6 +142,7 @@ class Game
       moving_piece.first_move = false
     end
 
+    # Now that we have our projected board state, check if the proposed state would resolve check
     check_for_check(projected_board, proj_green_manifest, proj_white_manifest, @turn)
   end
 
