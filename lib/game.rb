@@ -141,9 +141,16 @@ class Game
       moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
       moving_piece.first_move = false
     end
-
     # Now that we have our projected board state, check if the proposed state would resolve check
-    check_for_check(projected_board, proj_green_manifest, proj_white_manifest, @turn)
+    check_for_check(projected_board, proj_green_manifest, proj_white_manifest, opposite_turn(@turn))
+  end
+
+  def opposite_turn(turn)
+    if turn == :white
+      :green
+    elsif turn == :green
+      :white
+    end
   end
 
   def generate_piece_manifest(board_array)
