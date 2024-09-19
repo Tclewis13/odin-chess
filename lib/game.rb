@@ -57,6 +57,28 @@ class Game
       end
     end
 
+    # Prevent a King from moving into check
+    if moving_piece.symbol == 'K'
+      # make deep copies of board state so that we can check the validity of the proposed move
+      projected_board = Marshal.load(Marshal.dump(@board))
+      proj_green_manifest = @green_manifest.clone
+      proj_white_manifest = @white_manifest.clone
+      proj_destination_space = projected_board.board_array[destination_space.board_x][destination_space.board_y]
+      proj_moving_piece = (proj_green_manifest | proj_white_manifest).select { |piece| piece.current_pos[0] == moving_piece.current_pos[0] && piece.current_pos[1] == moving_piece.current_pos[1] } # rubocop:disable Layout/LineLength
+      proj_moving_piece = proj_moving_piece[0]
+      proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
+      # Need to reassign projected board's king to our projected king after deserialization
+      if proj_moving_piece.color == :green
+        projected_board.green_king = proj_moving_piece
+      elsif proj_moving_piece.color == :white
+        projected_board.white_king = proj_moving_piece
+      end
+      if check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
+        puts 'Cannot move King into check!'
+        game_flow
+      end
+    end
+
     # if destination is empty
     if destination_space.piece.nil?
       destination_space.piece = moving_piece
@@ -118,7 +140,7 @@ class Game
   end
 
   def check_resolution(projected_board, proj_green_manifest, proj_white_manifest, destination_space, moving_piece)
-    # making changes to copied board state here. Should probably make this and the version in game_flow its own method but lololol whatever
+    # if destination empty
     if destination_space.piece.nil?
       destination_space.piece = moving_piece
       projected_board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
