@@ -19,6 +19,10 @@ class Game
   end
 
   def game_flow
+    if @check && check_for_checkmate
+      puts 'Checkmate!'
+      exit
+    end
     # get piece to move from user
     puts "#{@turn} turn. Select piece to move."
     notation_piece = gets.chomp
@@ -117,6 +121,34 @@ class Game
     end
 
     game_flow
+  end
+
+  def check_for_checkmate
+    mate_manifest = []
+    legal_moves = []
+    if @turn == :green
+      mate_manifest = @green_manifest
+    elsif @turn == :white
+      mate_manifest = @white_manifest
+    end
+    binding.pry
+    mate_manifest.each do |defender|
+      # Pawns threaten spaces differently than other pieces
+      defender.symbol == 'P' ? (legal_moves = piece.get_check_moves(@board.board_array)) : (legal_moves = defender.get_moves(@board.board_array)) # rubocop:disable Layout/LineLength
+      legal_moves.each do |move|
+        projected_board = Marshal.load(Marshal.dump(@board))
+        proj_green_manifest = @green_manifest.clone
+        proj_white_manifest = @white_manifest.clone
+        proj_destination_space = projected_board.board_array[move[0]][move[1]]
+        proj_moving_piece = mate_manifest.select { |piece| piece.current_pos[0] == defender.current_pos[0] && piece.current_pos[1] == defender.current_pos[1] } # rubocop:disable Layout/LineLength
+        proj_moving_piece = proj_moving_piece[0]
+        proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
+        if check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
+          return true
+        end
+      end
+    end
+    true
   end
 
   def check_for_check(board, green_manifest, white_manifest, turn)

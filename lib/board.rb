@@ -177,7 +177,7 @@ class Board
     when 'E'
       length = 4
     when 'F'
-      legnth = 5
+      length = 5
     when 'G'
       length = 6
     when 'H'
