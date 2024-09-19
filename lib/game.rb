@@ -131,7 +131,6 @@ class Game
     elsif @turn == :white
       mate_manifest = @white_manifest
     end
-    binding.pry
     mate_manifest.each do |defender|
       # Pawns threaten spaces differently than other pieces
       defender.symbol == 'P' ? (legal_moves = piece.get_check_moves(@board.board_array)) : (legal_moves = defender.get_moves(@board.board_array)) # rubocop:disable Layout/LineLength
