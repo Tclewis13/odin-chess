@@ -62,6 +62,14 @@ class Board
     @green_king = @board_array[0][0].piece
   end
 
+  def change_pawn(pawn, change)
+    if change == 'Q'
+      Queen.new(pawn.color, [pawn.current_pos[0], pawn.current_pos[1]], QUEEN_MOVESET)
+    elsif change == 'N'
+      Knight.new(pawn.color, [pawn.current_pos[0], pawn.current_pos[1]], KNIGHT_MOVESET)
+    end
+  end
+
   def setup_stalemate
     @board_array[3][2].piece = King.new(:green, [3, 2], KING_MOVESET)
     @green_king = @board_array[3][2].piece

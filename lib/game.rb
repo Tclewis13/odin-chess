@@ -84,6 +84,11 @@ class Game
         @passant_pawn.taken = true
         @board.board_array[@passant_pawn.current_pos[0]][@passant_pawn.current_pos[1]].piece = nil
         @passant_pawn.current_pos = [nil, nil]
+        if @turn == :white
+          @green_manifest.delete(@passant_pawn)
+        elsif @turn == :green
+          @white_manifest.delete(@passant_pawn)
+        end
       end
     # if destination is occupied
     else
@@ -99,6 +104,13 @@ class Game
       @board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
       moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
       moving_piece.first_move = false
+    end
+
+    # if a pawn moved, check to see if it can transform
+    if moving_piece.symbol == 'P' && moving_piece.color == :white
+      moving_piece = transform_pawn(moving_piece) if moving_piece.current_pos[0] == 0
+    elsif moving_piece.symbol == 'P' && moving_piece.color == :green
+      moving_piece = transform_pawn(moving_piece) if moving_piece.current_pos[0] == 7
     end
 
     @passant_pawn = nil
@@ -120,6 +132,34 @@ class Game
     end
 
     game_flow
+  end
+
+  def transform_pawn(pawn)
+    if @turn == :green
+      @green_manifest.delete(pawn)
+    elsif @turn == :white
+      @white_manifest.delete(pawn)
+    end
+
+    puts "Pawn at #{@board.coord_to_notation([pawn.current_pos[0], pawn.current_pos[1]])} can transform. Enter N for Knight and Q for Queen." # rubocop:disable Layout/LineLength
+    transformation = gets.chomp
+    transformation = transformation.upcase
+    if transformation == 'N'
+      transformed_pawn = @board.change_pawn(pawn, transformation)
+      pawn.taken = true
+      pawn.current_pos = [nil, nil]
+      @board.board_array[transformed_pawn.current_pos[0]][transformed_pawn.current_pos[1]].piece = transformed_pawn
+    elsif transformation == 'Q'
+      transformed_pawn = @board.change_pawn(pawn, transformation)
+      pawn.taken = true
+      pawn.current_pos = [nil, nil]
+      @board.board_array[transformed_pawn.current_pos[0]][transformed_pawn.current_pos[1]].piece = transformed_pawn
+    end
+
+    if transformed_pawn.color == :green then @green_manifest << transformed_pawn
+    elsif transformed_pawn.color == :white then @white_manifest << transformed_pawn
+    end
+    transformed_pawn
   end
 
   def check_king_move(destination_space, moving_piece)
