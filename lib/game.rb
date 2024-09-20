@@ -19,6 +19,7 @@ class Game
   end
 
   def game_flow
+    # check for checkmate
     if @check && check_for_checkmate
       puts 'Checkmate!'
       exit
@@ -143,6 +144,7 @@ class Game
     elsif @turn == :white
       mate_manifest = @white_manifest
     end
+    # check to see if any defending pieces have any moves that can resolve check
     mate_manifest.each do |defender|
       legal_moves = defender.get_moves(@board.board_array)
       legal_moves.each do |move|
@@ -153,6 +155,7 @@ class Game
         proj_moving_piece = mate_manifest.select { |piece| piece.current_pos[0] == defender.current_pos[0] && piece.current_pos[1] == defender.current_pos[1] } # rubocop:disable Layout/LineLength
         proj_moving_piece = proj_moving_piece[0]
         proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
+        # need to make sure defending king doesnt just move into another check position
         next if defender.symbol == 'K' && !check_king_move(proj_destination_space, proj_moving_piece)
         unless check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
           return false
@@ -218,10 +221,11 @@ class Game
     elsif @turn == :white
       manifest = @white_manifest
     end
-
+    # check to see if current player has any moves that wouldn't result in check
     manifest.each do |piece|
       legal_moves = piece.get_moves(@board.board_array)
       actually_legal_moves = legal_moves.clone
+      # if the considered piece is a king, remove moves that would make him move into check
       if piece.symbol == 'K'
         legal_moves.each_with_index do |move, index|
           destination_space = @board.board_array[move[0]][move[1]]
