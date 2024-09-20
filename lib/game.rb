@@ -53,19 +53,17 @@ class Game
     destination_space = @board.board_array[coord_dest[0]][coord_dest[1]]
 
     # if last turn triggered check we need to make sure this move will remove check
-    if @check
-      # make deep copies of board state so that we can check the validity of the proposed move
-      projected_board = Marshal.load(Marshal.dump(@board))
-      proj_green_manifest = @green_manifest.clone
-      proj_white_manifest = @white_manifest.clone
-      proj_destination_space = projected_board.board_array[destination_space.board_x][destination_space.board_y]
-      proj_moving_piece = (proj_green_manifest | proj_white_manifest).select { |piece| piece.current_pos[0] == moving_piece.current_pos[0] && piece.current_pos[1] == moving_piece.current_pos[1] } # rubocop:disable Layout/LineLength
-      proj_moving_piece = proj_moving_piece[0]
-      proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
-      if check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
-        puts 'This move does not resolve check!'
-        game_flow
-      end
+    # make deep copies of board state so that we can check the validity of the proposed move
+    projected_board = Marshal.load(Marshal.dump(@board))
+    proj_green_manifest = @green_manifest.clone
+    proj_white_manifest = @white_manifest.clone
+    proj_destination_space = projected_board.board_array[destination_space.board_x][destination_space.board_y]
+    proj_moving_piece = (proj_green_manifest | proj_white_manifest).select { |piece| piece.current_pos[0] == moving_piece.current_pos[0] && piece.current_pos[1] == moving_piece.current_pos[1] } # rubocop:disable Layout/LineLength
+    proj_moving_piece = proj_moving_piece[0]
+    proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
+    if check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
+      @check ? (puts 'This move does not resolve check!') : (puts 'This piece is pinned!')
+      game_flow
     end
 
     # Prevent a King from moving into check
@@ -147,7 +145,7 @@ class Game
     end
     mate_manifest.each do |defender|
       # Pawns threaten spaces differently than other pieces
-      defender.symbol == 'P' ? (legal_moves = piece.get_check_moves(@board.board_array)) : (legal_moves = defender.get_moves(@board.board_array)) # rubocop:disable Layout/LineLength
+      defender.symbol == 'P' ? (legal_moves = defender.get_check_moves(@board.board_array)) : (legal_moves = defender.get_moves(@board.board_array)) # rubocop:disable Layout/LineLength
       legal_moves.each do |move|
         projected_board = Marshal.load(Marshal.dump(@board))
         proj_green_manifest = @green_manifest.clone
@@ -156,8 +154,8 @@ class Game
         proj_moving_piece = mate_manifest.select { |piece| piece.current_pos[0] == defender.current_pos[0] && piece.current_pos[1] == defender.current_pos[1] } # rubocop:disable Layout/LineLength
         proj_moving_piece = proj_moving_piece[0]
         proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
-        if check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
-          return true
+        unless check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
+          return false
         end
       end
     end
@@ -256,6 +254,12 @@ class Game
       @white_manifest << board_array[2][1].piece
       @white_manifest << board_array[2][3].piece
       @white_manifest << board_array[7][1].piece
+      @white_manifest << board_array[0][0].piece
+    elsif setup == 'pin'
+      @green_manifest << board_array[2][3].piece
+      @white_manifest << board_array[6][3].piece
+      @white_manifest << board_array[5][3].piece
+      @green_manifest << board_array[0][0].piece
     end
   end
 end

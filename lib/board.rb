@@ -48,7 +48,18 @@ class Board
       setup_kings(setup)
     elsif setup == 'stalemate'
       setup_stalemate
+    elsif setup == 'pin'
+      setup_pin
     end
+  end
+
+  def setup_pin
+    @board_array[2][3].piece = Rook.new(:green, [2, 3], ROOK_MOVESET)
+    @board_array[6][3].piece = King.new(:white, [6, 3], KING_MOVESET)
+    @white_king = @board_array[6][3].piece
+    @board_array[5][3].piece = Queen.new(:white, [5, 3], QUEEN_MOVESET)
+    @board_array[0][0].piece = King.new(:green, [0, 0], KING_MOVESET)
+    @green_king = @board_array[0][0].piece
   end
 
   def setup_stalemate
@@ -57,6 +68,8 @@ class Board
     @board_array[2][1].piece = Rook.new(:white, [2, 1], ROOK_MOVESET)
     @board_array[2][3].piece = Rook.new(:white, [2, 3], ROOK_MOVESET)
     @board_array[7][1].piece = Rook.new(:white, [7, 1], ROOK_MOVESET)
+    @board_array[0][0].piece = King.new(:white, [0, 0], KING_MOVESET)
+    @white_king = @board_array[0][0].piece
   end
 
   def setup_pawns(setup)

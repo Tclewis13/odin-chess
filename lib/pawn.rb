@@ -41,14 +41,14 @@ class Pawn < Piece
     legal_moves = []
     if @color == :white
       take_pos = [@current_pos[0] - 1, @current_pos[1] + 1]
-      if !board_array[take_pos[0]][take_pos[1]].nil? && board_array[take_pos[0]][take_pos[1]].piece.color == :green && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
+      if !board_array[take_pos[0]][take_pos[1]].nil? && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
       take_pos = [@current_pos[0] - 1, @current_pos[1] - 1]
-      if !board_array[take_pos[0]][take_pos[1]].nil? && board_array[take_pos[0]][take_pos[1]].piece.color == :green && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
+      if !board_array[take_pos[0]][take_pos[1]].nil? && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
     elsif @color == :green
       take_pos = [@current_pos[0] + 1, @current_pos[1] + 1]
-      if !board_array[take_pos[0]][take_pos[1]].nil? && board_array[take_pos[0]][take_pos[1]].piece.color == :white && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
+      if !board_array[take_pos[0]][take_pos[1]].nil? && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
       take_pos = [@current_pos[0] + 1, @current_pos[1] - 1]
-      if !board_array[take_pos[0]][take_pos[1]].nil? && board_array[take_pos[0]][take_pos[1]].piece.color == :white && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
+      if !board_array[take_pos[0]][take_pos[1]].nil? && take_pos[0].between?(0, 7) && take_pos[1].between?(0, 7) then legal_moves << take_pos end # rubocop:disable Layout/LineLength
     end
     legal_moves
   end
