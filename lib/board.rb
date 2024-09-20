@@ -232,8 +232,13 @@ class Board
     [depth, length]
   end
 
-  def move_legal?(piece, destination)
-    legal_moves = piece.get_moves(@board_array)
-    legal_moves.include?(destination)
+  def move_legal?(piece, destination, passant_pawn = nil)
+    if piece.symbol == 'P' && !passant_pawn.nil?
+      legal_moves = piece.en_passant(@board_array, passant_pawn)
+      legal_moves.include?(destination)
+    else
+      legal_moves = piece.get_moves(@board_array)
+      legal_moves.include?(destination)
+    end
   end
 end

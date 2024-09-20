@@ -3,7 +3,7 @@ require_relative 'space'
 require 'pry-byebug'
 
 class Game
-  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest, :check
+  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest, :check, :passant_pawn
 
   def initialize(board, setup = 'nil')
     self.board = board
@@ -47,7 +47,7 @@ class Game
     notation_dest = gets.chomp
     notation_dest = notation_dest.upcase
     coord_dest = @board.notation_to_coord(notation_dest)
-    if coord_dest.nil? || !@board.move_legal?(moving_piece, coord_dest)
+    if coord_dest.nil? || !@board.move_legal?(moving_piece, coord_dest, @passant_pawn)
       puts 'Invalid input.'
       game_flow
     end
@@ -79,6 +79,12 @@ class Game
       @board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
       moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
       moving_piece.first_move = false
+
+      if moving_piece.symbol == 'P' && !@passant_pawn.nil? && (moving_piece.color == :white && @board.board_array[destination_space.board_x + 1][destination_space.board_y].piece == @passant_pawn)
+        @passant_pawn.taken = true
+        @board.board_array[@passant_pawn.current_pos[0]][@passant_pawn.current_pos[1]].piece = nil
+        @passant_pawn.current_pos = [nil, nil]
+      end
     # if destination is occupied
     else
       if @turn == :white
@@ -94,6 +100,9 @@ class Game
       moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
       moving_piece.first_move = false
     end
+
+    @passant_pawn = nil
+    @passant_pawn = moving_piece if moving_piece.symbol == 'P' && moving_piece.double_moved == true
 
     @board.print_board(@board.board_array)
 
