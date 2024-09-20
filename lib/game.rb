@@ -144,8 +144,7 @@ class Game
       mate_manifest = @white_manifest
     end
     mate_manifest.each do |defender|
-      # Pawns threaten spaces differently than other pieces
-      defender.symbol == 'P' ? (legal_moves = defender.get_check_moves(@board.board_array)) : (legal_moves = defender.get_moves(@board.board_array)) # rubocop:disable Layout/LineLength
+      legal_moves = defender.get_moves(@board.board_array)
       legal_moves.each do |move|
         projected_board = Marshal.load(Marshal.dump(@board))
         proj_green_manifest = @green_manifest.clone
