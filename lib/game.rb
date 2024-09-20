@@ -154,6 +154,7 @@ class Game
         proj_moving_piece = mate_manifest.select { |piece| piece.current_pos[0] == defender.current_pos[0] && piece.current_pos[1] == defender.current_pos[1] } # rubocop:disable Layout/LineLength
         proj_moving_piece = proj_moving_piece[0]
         proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
+        next if defender.symbol == 'K' && !check_king_move(proj_destination_space, proj_moving_piece)
         unless check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
           return false
         end
