@@ -39,14 +39,24 @@ class Board
   end
 
   def setup_board(setup)
-    return if setup != 'default'
+    if setup == 'default'
+      setup_pawns(setup)
+      setup_rooks(setup)
+      setup_knights(setup)
+      setup_bishops(setup)
+      setup_queens(setup)
+      setup_kings(setup)
+    elsif setup == 'stalemate'
+      setup_stalemate
+    end
+  end
 
-    setup_pawns(setup)
-    setup_rooks(setup)
-    setup_knights(setup)
-    setup_bishops(setup)
-    setup_queens(setup)
-    setup_kings(setup)
+  def setup_stalemate
+    @board_array[3][2].piece = King.new(:green, [3, 2], KING_MOVESET)
+    @green_king = @board_array[3][2].piece
+    @board_array[2][1].piece = Rook.new(:white, [2, 1], ROOK_MOVESET)
+    @board_array[2][3].piece = Rook.new(:white, [2, 3], ROOK_MOVESET)
+    @board_array[7][1].piece = Rook.new(:white, [7, 1], ROOK_MOVESET)
   end
 
   def setup_pawns(setup)

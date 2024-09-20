@@ -13,7 +13,7 @@ class Game
     self.green_manifest = []
     self.white_manifest = []
     self.check = false
-    generate_piece_manifest(@board.board_array)
+    generate_piece_manifest(@board.board_array, setup)
 
     game_flow
   end
@@ -23,6 +23,13 @@ class Game
       puts 'Checkmate!'
       exit
     end
+
+    # check for stalemate
+    if check_for_stalemate
+      puts 'Stalemate!'
+      exit
+    end
+
     # get piece to move from user
     puts "#{@turn} turn. Select piece to move."
     notation_piece = gets.chomp
@@ -62,25 +69,9 @@ class Game
     end
 
     # Prevent a King from moving into check
-    if moving_piece.symbol == 'K'
-      # make deep copies of board state so that we can check the validity of the proposed move
-      projected_board = Marshal.load(Marshal.dump(@board))
-      proj_green_manifest = @green_manifest.clone
-      proj_white_manifest = @white_manifest.clone
-      proj_destination_space = projected_board.board_array[destination_space.board_x][destination_space.board_y]
-      proj_moving_piece = (proj_green_manifest | proj_white_manifest).select { |piece| piece.current_pos[0] == moving_piece.current_pos[0] && piece.current_pos[1] == moving_piece.current_pos[1] } # rubocop:disable Layout/LineLength
-      proj_moving_piece = proj_moving_piece[0]
-      proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
-      # Need to reassign projected board's king to our projected king after deserialization
-      if proj_moving_piece.color == :green
-        projected_board.green_king = proj_moving_piece
-      elsif proj_moving_piece.color == :white
-        projected_board.white_king = proj_moving_piece
-      end
-      if check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
-        puts 'Cannot move King into check!'
-        game_flow
-      end
+    if moving_piece.symbol == 'K' && !check_king_move(destination_space, moving_piece)
+      puts 'King cannot move into check!'
+      game_flow
     end
 
     # if destination is empty
@@ -121,6 +112,29 @@ class Game
     end
 
     game_flow
+  end
+
+  def check_king_move(destination_space, moving_piece)
+    # make deep copies of board state so that we can check the validity of the proposed move
+    projected_board = Marshal.load(Marshal.dump(@board))
+    proj_green_manifest = @green_manifest.clone
+    proj_white_manifest = @white_manifest.clone
+    proj_destination_space = projected_board.board_array[destination_space.board_x][destination_space.board_y]
+    proj_moving_piece = (proj_green_manifest | proj_white_manifest).select { |piece| piece.current_pos[0] == moving_piece.current_pos[0] && piece.current_pos[1] == moving_piece.current_pos[1] } # rubocop:disable Layout/LineLength
+    proj_moving_piece = proj_moving_piece[0]
+    proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
+    # Need to reassign projected board's king to our projected king after deserialization
+    if proj_moving_piece.color == :green
+      projected_board.green_king = proj_moving_piece
+    elsif proj_moving_piece.color == :white
+      projected_board.white_king = proj_moving_piece
+    end
+    unless check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space,
+                            proj_moving_piece)
+      return true
+    end
+
+    false
   end
 
   def check_for_checkmate
@@ -199,6 +213,28 @@ class Game
     check_for_check(projected_board, proj_green_manifest, proj_white_manifest, opposite_turn(@turn))
   end
 
+  def check_for_stalemate
+    manifest = []
+    if @turn == :green
+      manifest = @green_manifest
+    elsif @turn == :white
+      manifest = @white_manifest
+    end
+
+    manifest.each do |piece|
+      legal_moves = piece.get_moves(@board.board_array)
+      actually_legal_moves = legal_moves.clone
+      if piece.symbol == 'K'
+        legal_moves.each_with_index do |move, index|
+          destination_space = @board.board_array[move[0]][move[1]]
+          actually_legal_moves.delete(move) unless check_king_move(destination_space, piece)
+        end
+      end
+      return false unless actually_legal_moves.empty?
+    end
+    true
+  end
+
   def opposite_turn(turn)
     if turn == :white
       :green
@@ -207,12 +243,19 @@ class Game
     end
   end
 
-  def generate_piece_manifest(board_array)
-    2.times do |i|
-      8.times do |j|
-        @green_manifest << board_array[i][j].piece
-        @white_manifest << board_array[i + 6][j].piece
+  def generate_piece_manifest(board_array, setup)
+    if setup == 'default'
+      2.times do |i|
+        8.times do |j|
+          @green_manifest << board_array[i][j].piece
+          @white_manifest << board_array[i + 6][j].piece
+        end
       end
+    elsif setup == 'stalemate'
+      @green_manifest << board_array[3][2].piece
+      @white_manifest << board_array[2][1].piece
+      @white_manifest << board_array[2][3].piece
+      @white_manifest << board_array[7][1].piece
     end
   end
 end
