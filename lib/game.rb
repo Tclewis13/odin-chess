@@ -3,7 +3,7 @@ require_relative 'space'
 require 'pry-byebug'
 
 class Game
-  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest, :check, :passant_pawn
+  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest, :check, :passant_pawn, :game_type
 
   def initialize(board, setup = 'nil')
     self.board = board
@@ -14,6 +14,17 @@ class Game
     self.white_manifest = []
     self.check = false
     generate_piece_manifest(@board.board_array, setup)
+
+    puts 'This chess. Here are rules.'
+    puts 'Input piece selection and moves with board notation. Example: D5'
+    puts 'To castle, input CASTLE when selecting a piece to move.'
+    puts 'Input pvp for two player game. Input pve for game vs AI'
+    self.game_type = gets.chomp
+
+    unless @game_type == 'pve' || @game_type == 'pvp'
+      puts 'Why are you being difficult >:('
+      exit
+    end
 
     game_flow
   end
@@ -31,45 +42,52 @@ class Game
       exit
     end
 
-    # get piece to move from user
-    puts "#{@turn} turn. Select piece to move."
-    notation_piece = gets.chomp
-    notation_piece = notation_piece.upcase
-    if notation_piece == 'CASTLE'
-      castle
+    if @turn == :white || (@turn == :green && @game_type == 'pvp')
+      # get piece to move from user
+      puts "#{@turn} turn. Select piece to move."
+      notation_piece = gets.chomp
+      notation_piece = notation_piece.upcase
+      if notation_piece == 'CASTLE'
+        castle
 
-      if check_for_check(@board, @green_manifest, @white_manifest, @turn)
-        puts "#{@turn} King is in check!"
-        @check = true
+        if check_for_check(@board, @green_manifest, @white_manifest, @turn)
+          puts "#{@turn} King is in check!"
+          @check = true
+        end
+
+        # pass turn
+        if @turn == :white
+          @turn = :green
+        elsif @turn == :green
+          @turn = :white
+        end
+
+        @board.print_board(@board.board_array)
+        game_flow
+      end
+      coord_piece = @board.notation_to_coord(notation_piece)
+      moving_piece = @board.board_array[coord_piece[0]][coord_piece[1]].piece
+      if coord_piece.nil? || moving_piece.nil? || moving_piece.color != @turn
+        puts 'Invalid input.'
+        game_flow
       end
 
-      # pass turn
-      if @turn == :white
-        @turn = :green
-      elsif @turn == :green
-        @turn = :white
+      # get destination space from user
+      puts "#{@turn} is moving piece at #{notation_piece}. Select destination."
+      notation_dest = gets.chomp
+      notation_dest = notation_dest.upcase
+      coord_dest = @board.notation_to_coord(notation_dest)
+      if coord_dest.nil? || !@board.move_legal?(moving_piece, coord_dest, @passant_pawn)
+        puts 'Invalid input.'
+        game_flow
       end
-
-      @board.print_board(@board.board_array)
-      game_flow
+      destination_space = @board.board_array[coord_dest[0]][coord_dest[1]]
+    else
+      ai_move = get_AI_move(:green)
+      moving_piece = ai_move[0]
+      destination = ai_move[1]
+      destination_space = @board.board_array[destination[0]][destination[1]]
     end
-    coord_piece = @board.notation_to_coord(notation_piece)
-    moving_piece = @board.board_array[coord_piece[0]][coord_piece[1]].piece
-    if coord_piece.nil? || moving_piece.nil? || moving_piece.color != @turn
-      puts 'Invalid input.'
-      game_flow
-    end
-
-    # get destination space from user
-    puts "#{@turn} is moving piece at #{notation_piece}. Select destination."
-    notation_dest = gets.chomp
-    notation_dest = notation_dest.upcase
-    coord_dest = @board.notation_to_coord(notation_dest)
-    if coord_dest.nil? || !@board.move_legal?(moving_piece, coord_dest, @passant_pawn)
-      puts 'Invalid input.'
-      game_flow
-    end
-    destination_space = @board.board_array[coord_dest[0]][coord_dest[1]]
 
     # if last turn triggered check we need to make sure this move will remove check
     # make deep copies of board state so that we can check the validity of the proposed move
@@ -481,6 +499,22 @@ class Game
       @white_manifest << board_array[6][3].piece
       @white_manifest << board_array[5][3].piece
       @green_manifest << board_array[0][0].piece
+    end
+  end
+
+  def get_AI_move(color)
+    manifest = []
+    if color == :green
+      manifest = @green_manifest
+    elsif color == :white
+      manifest = @white_manifest
+    end
+
+    piece = manifest.sample
+    legal_moves = piece.get_moves(@board.board_array)
+    if legal_moves.empty? then get_AI_move(:green) else
+                                                     move = legal_moves.sample
+                                                     [piece, move]
     end
   end
 end
