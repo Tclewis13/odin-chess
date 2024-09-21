@@ -156,7 +156,7 @@ class Game
 
     # check to see if this move checked the other king
     if check_for_check(@board, @green_manifest, @white_manifest, @turn)
-      puts "#{@turn} King is in check!"
+      puts "#{opposite_turn(@turn)} King is in check!"
       @check = true
     end
 
