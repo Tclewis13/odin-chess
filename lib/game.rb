@@ -239,7 +239,19 @@ class Game
         proj_destination_space = projected_board.board_array[move[0]][move[1]]
         proj_moving_piece = mate_manifest.select { |piece| piece.current_pos[0] == defender.current_pos[0] && piece.current_pos[1] == defender.current_pos[1] } # rubocop:disable Layout/LineLength
         proj_moving_piece = proj_moving_piece[0]
+        # need to remove pre-serialized moving piece from projected manifest
+        if @turn == :green
+          proj_green_manifest.delete(proj_moving_piece)
+        elsif @turn == :white
+          proj_white_manifest.delete(proj_moving_piece)
+        end
         proj_moving_piece = Marshal.load(Marshal.dump(proj_moving_piece))
+        # adding post-serialized moving piece to projected manifest
+        if @turn == :green
+          proj_green_manifest << proj_moving_piece
+        elsif @turn == :white
+          proj_white_manifest << proj_moving_piece
+        end
         # need to make sure defending king doesnt just move into another check position
         next if defender.symbol == 'K' && !check_king_move(proj_destination_space, proj_moving_piece)
         unless check_resolution(projected_board, proj_green_manifest, proj_white_manifest, proj_destination_space, proj_moving_piece) # rubocop:disable Layout/LineLength
@@ -314,6 +326,12 @@ class Game
       projected_board.board_array[moving_piece.current_pos[0]][moving_piece.current_pos[1]].piece = nil
       moving_piece.current_pos = [destination_space.board_x, destination_space.board_y]
       moving_piece.first_move = false
+    end
+    # if the moving piece is a king we need to update his reference on the projected board
+    if moving_piece.symbol == 'K' && moving_piece.color == :green
+      projected_board.green_king = moving_piece
+    elsif moving_piece.symbol == 'K' && moving_piece.color == :white
+      projected_board.white_king = moving_piece
     end
     # Now that we have our projected board state, check if the proposed state would resolve check
     check_for_check(projected_board, proj_green_manifest, proj_white_manifest, opposite_turn(@turn))
@@ -499,6 +517,11 @@ class Game
       @white_manifest << board_array[6][3].piece
       @white_manifest << board_array[5][3].piece
       @green_manifest << board_array[0][0].piece
+    elsif setup == 'checkmate'
+      @green_manifest << board_array[0][4].piece
+      @white_manifest << board_array[7][7].piece
+      @white_manifest << board_array[6][3].piece
+      @white_manifest << board_array[7][3].piece
     end
   end
 

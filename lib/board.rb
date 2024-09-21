@@ -50,6 +50,8 @@ class Board
       setup_stalemate
     elsif setup == 'pin'
       setup_pin
+    elsif setup == 'checkmate'
+      setup_checkmate
     end
   end
 
@@ -68,6 +70,15 @@ class Board
     elsif change == 'N'
       Knight.new(pawn.color, [pawn.current_pos[0], pawn.current_pos[1]], KNIGHT_MOVESET)
     end
+  end
+
+  def setup_checkmate
+    @board_array[0][4].piece = King.new(:green, [0, 4], KING_MOVESET)
+    @green_king = @board_array[0][4].piece
+    @board_array[7][7].piece = King.new(:white, [7, 7], KING_MOVESET)
+    @white_king = @board_array[7][7].piece
+    @board_array[6][3].piece = Queen.new(:white, [6, 3], QUEEN_MOVESET)
+    @board_array[7][3].piece = Rook.new(:white, [7, 3], ROOK_MOVESET)
   end
 
   def setup_stalemate
