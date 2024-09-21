@@ -47,6 +47,7 @@ class Game
       puts "#{@turn} turn. Select piece to move."
       notation_piece = gets.chomp
       notation_piece = notation_piece.upcase
+      notation_piece = notation_piece.strip
       if notation_piece == 'CASTLE'
         castle
 
@@ -66,8 +67,12 @@ class Game
         game_flow
       end
       coord_piece = @board.notation_to_coord(notation_piece)
+      if coord_piece.nil?
+        puts 'Invalid input.'
+        game_flow
+      end
       moving_piece = @board.board_array[coord_piece[0]][coord_piece[1]].piece
-      if coord_piece.nil? || moving_piece.nil? || moving_piece.color != @turn
+      if moving_piece.nil? || moving_piece.color != @turn
         puts 'Invalid input.'
         game_flow
       end
@@ -76,6 +81,7 @@ class Game
       puts "#{@turn} is moving piece at #{notation_piece}. Select destination."
       notation_dest = gets.chomp
       notation_dest = notation_dest.upcase
+      notation_dest = notation_dest.strip
       coord_dest = @board.notation_to_coord(notation_dest)
       if coord_dest.nil? || !@board.move_legal?(moving_piece, coord_dest, @passant_pawn)
         puts 'Invalid input.'
