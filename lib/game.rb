@@ -345,7 +345,7 @@ class Game
 
     # Queenside
     if direction == 'Q'
-      if @turn == :white # rubocop:disable Style/SoleNestedConditional
+      if @turn == :white
         # if king and rook have not moved
         if !@board.board_array[7][0].piece.nil? && @board.board_array[7][0].piece.first_move && !@board.board_array[7][4].piece.nil? && @board.board_array[7][0].piece.first_move
           # If the castling path is blocked
@@ -372,8 +372,36 @@ class Game
           return nil
         end
       end
+      if @turn == :green
+        # if king and rook have not moved
+        if !@board.board_array[0][0].piece.nil? && @board.board_array[0][0].piece.first_move && !@board.board_array[0][4].piece.nil? && @board.board_array[0][0].piece.first_move
+          # If the castling path is blocked
+          if !@board.board_array[0][1].piece.nil? || !@board.board_array[0][2].piece.nil? || !@board.board_array[0][3].piece.nil? # rubocop:disable Layout/LineLength,Metrics/BlockNesting
+            puts 'Cannot castle through pieces!'
+            return nil
+          end
+          # make sure spaces king moves through are not in check
+          if !space_check(@board, @green_manifest, @white_manifest, opposite_turn(@turn), @board.board_array[0][2]) && !space_check(@board, @green_manifest, @white_manifest, opposite_turn(@turn), @board.board_array[0][3]) # rubocop:disable Metrics/BlockNesting,Layout/LineLength
+            # rules finally satisfied, we complete the castling
+            @board.green_king.current_pos = [0, 2]
+            @board.board_array[0][4].piece = nil
+            @board.board_array[0][2].piece = @board.green_king
+            rook = @board.board_array[0][0].piece
+            rook.current_pos = [0, 3]
+            @board.board_array[0][0].piece = nil
+            @board.board_array[0][3].piece = rook
+          else
+            puts 'Castling spaces are in check!'
+            return nil
+          end
+        else
+          puts 'King or Rook has already moved!'
+          return nil
+        end
+      end
     end
 
+    # Kingside
     if direction == 'K' # rubocop:disable Style/GuardClause
       if @turn == :white # rubocop:disable Style/GuardClause,Style/SoleNestedConditional
         # if king and rook have not moved
