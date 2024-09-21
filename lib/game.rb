@@ -37,6 +37,20 @@ class Game
     notation_piece = notation_piece.upcase
     if notation_piece == 'CASTLE'
       castle
+
+      if check_for_check(@board, @green_manifest, @white_manifest, @turn)
+        puts "#{@turn} King is in check!"
+        @check = true
+      end
+
+      # pass turn
+      if @turn == :white
+        @turn = :green
+      elsif @turn == :green
+        @turn = :white
+      end
+
+      @board.print_board(@board.board_array)
       game_flow
     end
     coord_piece = @board.notation_to_coord(notation_piece)
@@ -329,9 +343,9 @@ class Game
     direction = gets.chomp
     direction = direction.upcase
 
-    # Kingside
-    if direction == 'Q' # rubocop:disable Style/GuardClause
-      if @turn == :white # rubocop:disable Style/GuardClause,Style/SoleNestedConditional
+    # Queenside
+    if direction == 'Q'
+      if @turn == :white # rubocop:disable Style/SoleNestedConditional
         # if king and rook have not moved
         if !@board.board_array[7][0].piece.nil? && @board.board_array[7][0].piece.first_move && !@board.board_array[7][4].piece.nil? && @board.board_array[7][0].piece.first_move
           # If the castling path is blocked
@@ -349,22 +363,39 @@ class Game
             rook.current_pos = [7, 3]
             @board.board_array[7][0].piece = nil
             @board.board_array[7][3].piece = rook
-
-            if check_for_check(@board, @green_manifest, @white_manifest, @turn)
-              puts "#{@turn} King is in check!"
-              @check = true
-            end
-
-            # pass turn
-            if @turn == :white
-              @turn = :green
-            elsif @turn == :green
-              @turn = :white
-            end
-
-            @board.print_board(@board.board_array)
           else
-            puts 'wut'
+            puts 'Castling spaces are in check!'
+            return nil
+          end
+        else
+          puts 'King or Rook has already moved!'
+          return nil
+        end
+      end
+    end
+
+    if direction == 'K' # rubocop:disable Style/GuardClause
+      if @turn == :white # rubocop:disable Style/GuardClause,Style/SoleNestedConditional
+        # if king and rook have not moved
+        if !@board.board_array[7][7].piece.nil? && @board.board_array[7][4].piece.first_move && !@board.board_array[7][4].piece.nil? && @board.board_array[7][0].piece.first_move
+          # If the castling path is blocked
+          if !@board.board_array[7][5].piece.nil? || !@board.board_array[7][6].piece.nil? # rubocop:disable Metrics/BlockNesting
+            puts 'Cannot castle through pieces!'
+            return nil
+          end
+          # make sure spaces king moves through are not in check
+          if !space_check(@board, @green_manifest, @white_manifest, opposite_turn(@turn), @board.board_array[7][5]) && !space_check(@board, @green_manifest, @white_manifest, opposite_turn(@turn), @board.board_array[7][6]) # rubocop:disable Metrics/BlockNesting,Layout/LineLength
+            # rules finally satisfied, we complete the castling
+            @board.white_king.current_pos = [7, 6]
+            @board.board_array[7][4].piece = nil
+            @board.board_array[7][6].piece = @board.white_king
+            rook = @board.board_array[7][7].piece
+            rook.current_pos = [7, 5]
+            @board.board_array[7][7].piece = nil
+            @board.board_array[7][5].piece = rook
+          else
+            puts 'Castling spaces are in check!'
+            return nil # rubocop:disable Style/RedundantReturn
           end
         else
           puts 'King or Rook has already moved!'
