@@ -104,6 +104,8 @@ class Game
       moving_piece = ai_move[0]
       destination = ai_move[1]
       destination_space = @board.board_array[destination[0]][destination[1]]
+      puts ''
+      puts "AI moved #{moving_piece.class.name} to #{@board.coord_to_notation([destination_space.board_x, destination_space.board_y])}" # rubocop:disable Layout/LineLength
     end
 
     # if last turn triggered check we need to make sure this move will remove check
