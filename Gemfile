@@ -9,3 +9,5 @@ gem "colorize", "~> 1.1"
 gem "rubocop", "~> 1.66"
 
 gem "rspec", "~> 3.13"
+
+gem "yaml", "~> 0.3.0"

@@ -1,9 +1,10 @@
 require_relative 'board'
 require_relative 'space'
 require 'pry-byebug'
+require 'yaml'
 
 class Game
-  attr_writer :board, :setup, :turn, :green_manifest, :white_manifest, :check, :passant_pawn, :game_type
+  attr_accessor :board, :setup, :turn, :green_manifest, :white_manifest, :check, :passant_pawn, :game_type
 
   def initialize(board, setup = 'nil')
     self.board = board
@@ -19,12 +20,15 @@ class Game
     puts 'Input piece selection and moves with board notation. Example: D5'
     puts 'To castle, input CASTLE when selecting a piece to move.'
     puts 'Input pvp for two player game. Input pve for game vs AI'
+    puts 'Input load to load a saved game.'
     self.game_type = gets.chomp
 
-    unless @game_type == 'pve' || @game_type == 'pvp'
+    unless @game_type == 'pve' || @game_type == 'pvp' || @game_type == 'load'
       puts 'Why are you being difficult >:('
       exit
     end
+
+    load_game if @game_type == 'load'
 
     game_flow
   end
@@ -48,6 +52,8 @@ class Game
       notation_piece = gets.chomp
       notation_piece = notation_piece.upcase
       notation_piece = notation_piece.strip
+
+      # check for castling input
       if notation_piece == 'CASTLE'
         castle
 
@@ -66,6 +72,11 @@ class Game
         @board.print_board(@board.board_array)
         game_flow
       end
+
+      # check for save/load input
+      save_game if notation_piece == 'SAVE'
+      load_game if notation_piece == 'LOAD'
+
       coord_piece = @board.notation_to_coord(notation_piece)
       if coord_piece.nil?
         puts 'Invalid input.'
@@ -544,6 +555,32 @@ class Game
     if legal_moves.empty? then get_AI_move(:green) else
                                                      move = legal_moves.sample
                                                      [piece, move]
+    end
+  end
+
+  def save_game
+    puts 'Input name of your save file (without .txt)'
+    save_name = gets.chomp
+    save_hash = {}
+    save_hash[:game] = self
+    out_file = File.new("#{save_name}.txt", 'w')
+    out_file.puts(save_hash.to_yaml)
+    out_file.close
+    exit
+  end
+
+  def load_game
+    puts 'Input name of your save file (without .txt)'
+    save_name = gets.chomp
+    if File.exist?("#{save_name}.txt")
+      in_file = File.open("#{save_name}.txt", 'r')
+      hash_serialized = File.read(in_file)
+      save_hash = YAML.load(hash_serialized, aliases: true, permitted_classes: [Game, Board, Piece, Pawn, Rook, Queen, King, Bishop, Knight, Space, Symbol]) # rubocop:disable Layout/LineLength
+      load_game = save_hash[:game]
+      load_game.board.print_board(load_game.board.board_array)
+      load_game.game_flow
+    else
+      puts 'Save does not exist. Exiting program.'
     end
   end
 end
