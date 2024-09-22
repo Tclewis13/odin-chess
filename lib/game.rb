@@ -89,7 +89,7 @@ class Game
       end
 
       # get destination space from user
-      puts "#{@turn} is moving piece at #{notation_piece}. Select destination."
+      puts "#{@turn} is moving #{moving_piece.class.name} at #{notation_piece}. Select destination."
       notation_dest = gets.chomp
       notation_dest = notation_dest.upcase
       notation_dest = notation_dest.strip
